@@ -1,0 +1,582 @@
+#: kivy 2.1.0
+#:import Factory kivy.factory.Factory
+#:import ScrollEffect  kivy.effects.scroll.ScrollEffect
+
+<TopMenu>
+	canvas.before:
+		Color:
+			rgba: 0,0,0.2,1
+		Rectangle:
+			pos: self.pos 
+			size: self.size
+		Color:
+			rgba: (0.3, 0.3, 0.3, 1)
+		Rectangle:
+			pos: (self.x+25, (root.top * 7.4/11) - 10)
+			size: (self.width-50, root.height * 1.1/11)
+	id: base
+	GridLayout:
+		x: root.x + 10
+		top: root.top -10	
+		width: root.width -25
+		row_default_height: root.height/11
+		rows:2
+		cols:5
+
+		Button:
+			text: 'View events'
+			font_size: 20
+			on_release: Factory.TaskView().open()
+
+		Button:
+			text: 'Add an event'
+			font_size: 20
+			on_release: Factory.AddEventWindow().open()
+
+		Button:
+			font_size: 20
+			text: 'Delete an event'
+			on_release: Factory.DeleteEventWindow().open()
+
+		Button:
+			font_size: 20
+			text: 'Clean up events'
+			on_release: root.clean_tasks()
+
+		Button:
+			font_size: 20
+			text: 'Calendar'
+			on_release: Factory.EventCalendar().open()
+
+		Button:
+			font_size: 20
+			text: 'View Notes'
+			on_release: Factory.NoteView().open()
+
+		Button:
+			font_size: 20
+			text: 'Add a note'
+			on_release: Factory.AddNoteWindow().open()
+
+		Button:
+			font_size: 20
+			text: 'Delete a note'
+			on_release: Factory.DeleteNoteWindow().open()
+
+		Button:
+			font_size: 20
+			text: 'Preferences'
+			on_release: Factory.UserSettings().open()
+
+		Button:
+			font_size: 20
+			text: 'Quit'
+			on_release: app.stop()
+
+
+
+	Label:
+		id: day
+		center_y: root.height * 7.85/11
+		x: root.x + 60
+		font_size: root.height/24
+		text: root.day
+
+	Label:
+		id: date
+		center_y: root.height * 7.85/11
+		center_x: root.center_x
+		font_size: root.height/24
+		text: root.str_date
+		# halign: 'right'
+
+	Label:
+		id: time
+		center_y: root.height * 7.85/11
+		right: root.right - 50
+		font_size: root.height/24
+		text: root.str_time
+
+
+	Label:
+		id: greeting
+		font_size: 25
+		halign: 'center'
+		center_x: root.center_x
+		top: root.height*7/11
+		text: root.greet
+
+	Label:
+		id: alerts
+		font_size: 25
+		halign: 'center'
+		x: root.width * 1/8
+		width: root.width * 3/4
+		height: root.height/3.8
+		top: root.height * 5/11
+		text: root.alert
+		text_size: self.size
+
+<EventCalendar>:
+	size_hint: (0.9,0.9)
+	title: root.sel_date
+	title_size: 20
+	on_dismiss: root.when_closed()
+	GridLayout:
+		id: calendar_grid
+		rows: 8
+		cols: 7
+		rows_minimum: {0:self.height/14, 1: self.height/14,2: self.height/7,3: self.height/7, 4: self.height/7,5: self.height/7, 6: self.height/7, 7:self.height/7}
+
+<DeleteOldTasks>:
+	auto_dismiss: False
+	size_hint: (0.8,0.4)
+	title: 'Caution'
+	title_size: 20
+	title_align: 'center'
+	GridLayout:
+		rows: 2
+		cols: 1
+		rows_minimum: {0: self.height*3/4, 1: self.height/4}
+		Label:
+			text: root.warning_msg
+			text_size: self.size
+			halign: 'center'
+			valign: 'middle'
+		GridLayout:
+			rows: 1
+			cols: 2
+			Button:
+				text: 'Delete'
+				on_release: root.del_events()
+			Button:
+				text: 'Cancel'
+				on_release: root.dismiss()
+
+<DateEventView>:
+	title: 'Events for ' + str(root.date.date())
+	title_align: 'center'
+	title_size: 20
+	size_hint: (0.9,0.9)
+	ScrollView:
+		do_scroll_x: False
+		do_scroll_y: True
+		GridLayout:
+			id: daily_task_grid
+			size_hint_y: None
+			height: self.minimum_height
+			row_default_height: 40
+			cols: 1
+
+<TaskView>:
+	title: 'Upcoming Events'
+	title_align: 'center'
+	title_size: 20
+	size_hint: (0.9, 0.9)
+	on_dismiss: root.when_closed()
+	GridLayout:
+		rows: 2
+		cols: 1
+		rows_minimum: {0: self.height /10, 1: self.height * 9/10}
+		GridLayout:
+			rows: 1
+			cols: 3
+			cols_minimum: {0: self.width/8, 1: self.width * 6/8, 2: self.width/8}
+			Button:
+				text: 'Prev.'
+				font_size: 30
+				bold: True
+				on_release: root.change_month('-')
+			Label:
+				text: root.sel_date
+				font_size: 30
+				bold: True
+			Button:
+				text: 'Next'
+				font_size: 30
+				bold: True 
+				on_release: root.change_month('+')
+		ScrollView:
+			id: scrollv
+			do_scroll_x: False
+			do_scroll_y: True
+			GridLayout:
+				id: taskgrid
+				size_hint_y: None
+				height: self.minimum_height
+				row_default_height: 40
+				cols:1
+
+<NoteView>:
+	title: 'Notes and lists'
+	title_size: 20
+	title_align: 'center'
+	size_hint: (0.9, 0.9)
+
+	ScrollView:
+		id: scrollv
+		do_scroll_x: False
+		do_scroll_y: True
+		GridLayout:
+			id: notegrid
+			size_hint_y: None
+			height: self.minimum_height
+			row_default_height: 40
+			cols:1
+
+<TaskDetails>:
+	rows:2
+	cols: 1
+	rows_minimum: {0: root.height/8, 1: root.height * 7/8}
+	Label:
+		text: str(root.w)
+		halign : 'left'
+		valign: 'middle'
+		text_size: self.size
+		font_size: 20
+	Label:
+		text: root.d
+		valign: 'top'
+		halign: 'left'
+		text_size: self.size
+		font_size: 20
+
+<NoteDetails>:
+	rows: 1
+	cols: 1
+	rows_minimum: {0: root.height/8, 1: root.height * 7/8}
+	Label:
+		text: root.d
+		valign: 'top'
+		halign: 'left'
+		text_size: self.size
+		font_size: 20
+
+<AddEventWindow>:
+	auto_dismiss: False
+	title: 'Add new event'
+	title_size: 20
+	title_align: 'center'
+	title_size: 20
+	size_hint: (0.9, 0.9)
+
+	GridLayout:
+		rows: 4
+		cols: 1
+		rows_minimum: {0: self.height/8, 1: self.height/8, 2:self.height * 5/8, 3: self.height/8}
+		TextInput:
+			id: title_input
+			multiline: False
+			hint_text: 'Title'
+			text: ''
+			font_size: 30
+			on_text: root.process_text('title')
+
+		GridLayout:
+			rows: 1
+			cols: 2
+			TextInput:
+				id: date_input
+				multiline: False
+				hint_text: root.date_hint
+				font_size: 30
+				on_text: root.process_text('date')
+			TextInput:
+				id: time_input
+				multiline: False
+				hint_text: root.time_hint
+				font_size: 30
+				on_text: root.process_text('time')
+
+		TextInput:
+			id: detail_input
+			hint_text: 'Event details'
+			font_size: 30
+			on_text: root.process_text('details')
+		GridLayout:
+			rows: 1
+			cols: 2
+			Button:
+				text: 'Save'
+				bold: True
+				font_size: 30
+				on_release: root.save_event()
+			Button:
+				text: 'Cancel'
+				bold: True
+				font_size: 30
+				on_release: root.dismiss()
+
+<AddNoteWindow>:
+	auto_dismiss: False
+	title: 'Add new note'
+	title_align: 'center'
+	title_size: 20
+	size_hint: (0.9, 0.9)
+
+	GridLayout:
+		rows: 3
+		cols: 1
+		rows_minimum:{0: self.height/8, 1: self.height * 6/8, 2: self.height/8}
+		TextInput:
+			id: title_input
+			multiline: False
+			hint_text: 'Title'
+			text: ''
+			font_size: 30
+			on_text: root.process_text('title')
+		TextInput:
+			id: description
+			multiline: True 
+			hint_text: 'Description'
+			text: ''
+			font_size: 30
+			on_text: root.process_text('contents')
+		GridLayout:
+			rows: 1
+			cols: 2
+			Button:
+				text: 'Save'
+				bold: True 
+				font_size: 30
+				on_release: root.save_note()
+			Button:
+				text: 'Cancel'
+				bold: True 
+				font_size: 30
+				on_release: root.dismiss()
+
+<DeleteNoteWindow>:
+	id: note_delete
+	title: "Delete which note?"
+	title_align: 'center'
+	title_size: 20
+	size_hint: (0.9, 0.9)
+	on_dismiss: root.when_closed()
+
+	ScrollView:
+		id: scrollv
+		do_scroll_x: False
+		do_scroll_y: True 
+		GridLayout:
+			id: notegrid
+			size_hint_y: None
+			height: self.minimum_height
+			row_default_height: 40 
+			cols: 1
+
+<DeleteEventWindow>:
+	title: 'Choose which event to remove'
+	title_align: 'center'
+	size_hint: (0.9, 0.9)
+	title_size: 20
+	id: del_ev_win
+	on_dismiss: root.when_closed()
+
+	ScrollView:
+		id: scrollv
+		do_scroll_x: False
+		do_scroll_y: True
+		GridLayout:
+			id: taskgrid
+			size_hint_y: None
+			height: self.minimum_height
+			row_default_height: 40
+			cols:1
+
+<NoteRemove>:
+	auto_dismiss: False
+	size_hint: (0.9, 0.9)
+	title: root.t
+	title_size: 20
+	title_align: 'center'
+	id: popup_note
+	linked: None
+	GridLayout:
+		rows: 3
+		cols: 1
+		rows_minimum: {0: self.height * 7/8, 1: self.height/8}
+		Label:
+			text: root.d
+			valign: 'top'
+			halign: 'left'
+			text_size: self.size
+			font_size: 20
+		GridLayout:
+			cols: 2
+			rows: 1
+			Button:
+				text: 'Delete'
+				bold: True
+				font_size: 30
+				on_release: root.delete_note()
+			Button:
+				text: 'Cancel'
+				bold: True 
+				font_size: 30
+				on_press:
+					root.dismiss()
+
+
+
+<TaskRemove>:
+	auto_dismiss: False
+	size_hint: (0.9, 0.9)
+	title: root.t 
+	title_size: 20
+	title_align: 'center'
+	GridLayout:
+		rows: 3
+		cols: 1
+		rows_minimum: {0: root.height/8, 1: root.height * 5/8, 2: root.height/8}
+		Label:
+			text: str(root.w)
+			halign : 'left'
+			valign: 'middle'
+			text_size: self.size
+		Label:
+			text: root.d
+			valign: 'top'
+			halign: 'left'
+			text_size: self.size
+		GridLayout:
+			cols: 2
+			rows: 1
+			Button:
+				text: 'Delete'
+				bold: True
+				font_size: 30
+				on_release: root.delete_task()
+			Button:
+				text: 'Cancel'
+				bold: True 
+				font_size: 30
+				on_release: root.dismiss()
+			
+
+<UserSettings>:
+	auto_dismiss: False
+	title: 'Preferences'
+	title_size: 20
+	title_align: 'center'
+
+	BoxLayout:
+		orientation: 'vertical'
+
+		GridLayout:
+			rows:3
+			cols:2
+			cols_minimum: {0: root.width/4, 1: root.width*2.8/4}
+			Label:
+			Label:
+			Label:
+				text: 	'Username'
+				halign: 'center'
+				font_size: 20
+			TextInput:
+				x: self.height/3
+				multiline: False
+				halign: 'center'
+				size_hint_y: None
+				height: root.height/10
+				font_size: root.height/20
+				on_text: root.set_user_name(username=self.text)
+			Label:
+			Label:
+
+		GridLayout:
+			rows:1
+			cols:2
+			cols_minimum: {0: root.width/4, 1: root.width*2.8/4}
+			row_default_height: root.height/6
+			Label:
+				text: 'Date Format'
+				halign: 'center'
+				font_size: 20
+			GridLayout:
+				cols:5
+				rows:1
+				Button:
+					halign: 'center'
+					text:"MM/DD/YYYY\n" + str(root.date.strftime('%m/%d/%Y'))
+					font_size:12
+					on_release: root.change_date_prefs('%m/%d/%Y', '%m/%d', 'MM/DD/YYYY')
+				Button:
+					halign: 'center'
+					text:"DD/MM/YYYY\n" + str(root.date.strftime('%d/%m/%Y'))
+					font_size:12
+					on_release: root.change_date_prefs('%d/%m/%Y', '%d/%m', 'DD/MM/YYYY')
+				Button:
+					halign: 'center'
+					text:"Month Day, Year\n" + str(root.date.strftime('%B %d, %Y'))
+					font_size:12
+					on_release: root.change_date_prefs('%B %d, %Y', '%B %d', 'Month DD, YYYY')
+				Button:
+					halign: 'center'
+					text:"YYYY/MM/DD\n" + str(root.date.strftime('%Y/%m/%d'))
+					font_size:12
+					on_release: root.change_date_prefs('%Y/%m/%d', '%Y/%m', 'YYYY/MM/DD')
+				Button:
+					halign: 'center'
+					text:"YYYY/DD/MM\n" + str(root.date.strftime('%Y/%d/%m'))
+					font_size:12
+					on_release: root.change_date_prefs('%Y/%d/%m', '%Y/%d', 'YYYY/DD/MM')
+		GridLayout:
+			rows:1
+			cols:2
+			cols_minimum: {0: root.width/4, 1: root.width*2.8/4}
+			row_default_height: root.height/6
+			Label:
+				text: 'Time Format'
+				halign: 'center'
+				font_size: 20
+			GridLayout:
+				cols:2
+				rows:1
+				Button:
+					halign: 'center'
+					text: "12 hour\n" + str(root.date.strftime('%I:%M %p'))
+					font_size: 20
+					on_release: root.change_time_prefs('%I:%M %p', 'HH/MM (12 Hour)')
+				Button:
+					halign: 'center'
+					text: "24 hour\n" + str(root.date.strftime('%H:%M'))
+					font_size: 20
+					on_release: root.change_time_prefs('%H:%M', 'HH/MM (24 hour)')
+
+		GridLayout:
+			rows:1
+			cols:2
+			cols_minimum: {0: root.width/4, 1: root.width*2.8/4}
+			row_default_height: root.height/6
+			Label:
+				text: 'Resolution'
+				halign: 'center'
+				font_size: 20
+			GridLayout:
+				cols: 3
+				rows:1
+				Button:	
+					text: '700x500'
+					font_size: 20
+					on_release: root.set_resolution(700, 500)
+				Button:
+					text: '800x600'
+					font_size: 20
+					on_release: root.set_resolution(800, 600)
+				Button:
+					text: '1000x700'
+					font_size: 20
+					on_release: root.set_resolution(1000, 700)
+
+
+		Button:
+			text: 'Save and exit'
+			halign: 'center'
+			font_size: 20
+			width: root.width*9/10
+			center_x: root.center_x
+			y: root.y + 20
+			height:root.height/6
+			on_press: root.save_prefs()
+			on_release: root.dismiss() 
